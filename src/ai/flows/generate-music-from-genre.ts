@@ -10,7 +10,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import wav from 'wav';
 
 const GenerateMusicFromGenreInputSchema = z.object({
   genre: z.string().describe('The genre of music to generate.'),
@@ -46,31 +45,66 @@ Follow these instructions strictly:
 3.  The output must be assigned to the 'musicDataBase64' field.`,
 });
 
+// Helper function to create a WAV file buffer from PCM data
+function pcmToWavBuffer(
+  pcmData: Buffer,
+  channels: number,
+  sampleRate: number,
+  bitDepth: number
+): Buffer {
+  const byteRate = sampleRate * channels * (bitDepth / 8);
+  const blockAlign = channels * (bitDepth / 8);
+  const dataSize = pcmData.length;
+  const riffSize = 36 + dataSize;
+
+  const header = Buffer.alloc(44);
+  let offset = 0;
+
+  // RIFF header
+  header.write('RIFF', offset);
+  offset += 4;
+  header.writeUInt32LE(riffSize, offset);
+  offset += 4;
+  header.write('WAVE', offset);
+  offset += 4;
+
+  // "fmt " sub-chunk
+  header.write('fmt ', offset);
+  offset += 4;
+  header.writeUInt32LE(16, offset);
+  offset += 4; // Sub-chunk size (16 for PCM)
+  header.writeUInt16LE(1, offset);
+  offset += 2; // Audio format (1 for PCM)
+  header.writeUInt16LE(channels, offset);
+  offset += 2;
+  header.writeUInt32LE(sampleRate, offset);
+  offset += 4;
+  header.writeUInt32LE(byteRate, offset);
+  offset += 4;
+  header.writeUInt16LE(blockAlign, offset);
+  offset += 2;
+  header.writeUInt16LE(bitDepth, offset);
+  offset += 2;
+
+  // "data" sub-chunk
+  header.write('data', offset);
+  offset += 4;
+  header.writeUInt32LE(dataSize, offset);
+  offset += 4;
+
+  return Buffer.concat([header, pcmData]);
+}
+
+
 async function toWav(
   pcmData: Buffer,
   channels = 1,
   rate = 24000,
   sampleWidth = 2
 ): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const writer = new wav.Writer({
-      channels,
-      sampleRate: rate,
-      bitDepth: sampleWidth * 8,
-    });
-
-    let bufs = [] as any[];
-    writer.on('error', reject);
-    writer.on('data', function (d) {
-      bufs.push(d);
-    });
-    writer.on('end', function () {
-      resolve(Buffer.concat(bufs).toString('base64'));
-    });
-
-    writer.write(pcmData);
-    writer.end();
-  });
+  const bitDepth = sampleWidth * 8;
+  const wavBuffer = pcmToWavBuffer(pcmData, channels, rate, bitDepth);
+  return wavBuffer.toString('base64');
 }
 
 const generateMusicFromGenreFlow = ai.defineFlow(
