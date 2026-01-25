@@ -18,7 +18,7 @@ import {z} from 'genkit';
 const DisplayMusicWithAICurationInputSchema = z.object({
   songTitle: z.string().describe('The title of the generated song.'),
   genreTags: z.array(z.string()).describe('An array of genre tags associated with the song.'),
-  audioFeatures: z.record(z.any()).describe('A record containing various audio features of the song (e.g., tempo, key, mood).'),
+  audioFeatures: z.record(z.any()).describe('A record containing various audio features of the song (e.g., tempo, key, mood), and may include a `resolvedStyle` from the KIY Motion Engine.'),
   imageDataUri: z.string().describe("The image associated with the song, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
 });
 export type DisplayMusicWithAICurationInput = z.infer<typeof DisplayMusicWithAICurationInputSchema>;
@@ -44,15 +44,17 @@ const curationPrompt = ai.definePrompt({
   output: {schema: DisplayMusicWithAICurationOutputSchema},
   prompt: `You are KIY, the Goddess of Rhythm and Motion, a master of creation and a music curation expert. Your task is to analyze a generated song, an artifact of the crucible, and decide which of its features are most resonant and important to display to the user.
 
+  The divine forces of motion have been calculated for this song. The final resolved style was '{{{audioFeatures.resolvedStyle}}}'. This represents the song's true essence, born from a confluence of user will, creative chance, and foundational principles.
+
   Here's information about the song:
   Title: {{{songTitle}}}
   Genre Tags: {{#each genreTags}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
   Audio Features: {{JSONstringify audioFeatures}}
   Image: {{media url=imageDataUri}}
 
-  Based on this information, decide:
+  Based on this information, and giving special consideration to the resolved style, decide:
   - Should the song title be included in the display? (titleIncluded: true/false)
-  - Which genre tags are most relevant to display? (displayedTags: array of strings)
+  - Which genre tags are most relevant to display? Make sure to include the resolved style if you find it important. (displayedTags: array of strings)
   - Which audio features should be highlighted? (highlightedFeatures: record)
   - Should the image be included? (imageIncluded: true/false)
 
