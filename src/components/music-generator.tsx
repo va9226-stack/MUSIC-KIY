@@ -9,8 +9,11 @@ import type { Song } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { User } from 'firebase/auth';
+import { Label } from './ui/label';
+import { Textarea } from './ui/textarea';
+import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 
-const genres = ['jazz', 'pop', 'rock', 'electronic', 'classical', 'hip-hop'];
+const genres = ['jazz', 'pop', 'rock', 'electronic', 'classical', 'hip-hop', 'country', 'reggae', 'blues', 'folk'];
 
 type MusicGeneratorProps = {
   onSongGenerated: (song: Omit<Song, 'id' | 'createdAt'>) => void;
@@ -19,6 +22,8 @@ type MusicGeneratorProps = {
 
 export function MusicGenerator({ onSongGenerated, user }: MusicGeneratorProps) {
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
+  const [lyrics, setLyrics] = useState('');
+  const [voice, setVoice] = useState('male');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -41,7 +46,7 @@ export function MusicGenerator({ onSongGenerated, user }: MusicGeneratorProps) {
     }
     setIsLoading(true);
     try {
-      const newSongData = await generateSongAction(selectedGenre);
+      const newSongData = await generateSongAction(selectedGenre, lyrics, voice);
       onSongGenerated(newSongData);
     } catch (error) {
       console.error(error);
@@ -61,11 +66,41 @@ export function MusicGenerator({ onSongGenerated, user }: MusicGeneratorProps) {
         <CardTitle className="font-headline text-3xl">Create New Music</CardTitle>
         <CardDescription>Let our AI compose a unique piece based on your chosen style.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-3">
-          <h3 className="text-lg font-headline font-semibold text-center">1. Select a Genre</h3>
+      <CardContent className="space-y-8">
+        <div className="space-y-3 text-center">
+          <h3 className="text-lg font-headline font-semibold">1. Write Your Lyrics (Optional)</h3>
+          <Textarea 
+            placeholder="In the city of chrome and code..."
+            value={lyrics}
+            onChange={(e) => setLyrics(e.target.value)}
+            className="min-h-[100px]"
+          />
+        </div>
+
+        <div className="space-y-3 text-center">
+          <h3 className="text-lg font-headline font-semibold">2. Select a Genre</h3>
           <GenreSelector genres={genres} selectedGenre={selectedGenre} onSelectGenre={setSelectedGenre} />
         </div>
+
+        <div className="space-y-3 text-center">
+          <h3 className="text-lg font-headline font-semibold">3. Choose a Voice</h3>
+            <RadioGroup
+              defaultValue="male"
+              onValueChange={setVoice}
+              value={voice}
+              className="flex justify-center gap-6"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="male" id="male" />
+                <Label htmlFor="male" className="text-base cursor-pointer">Male</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="female" id="female" />
+                <Label htmlFor="female" className="text-base cursor-pointer">Female</Label>
+              </div>
+            </RadioGroup>
+        </div>
+
         <Button
           size="lg"
           className="w-full font-bold text-lg h-12"

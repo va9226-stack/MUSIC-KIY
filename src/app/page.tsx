@@ -63,19 +63,17 @@ export default function Home() {
       createdAt: serverTimestamp(),
     };
 
-    try {
-      await addDoc(
-        collection(firestore, `users/${user.uid}/songs`),
-        songWithTimestamp
-      );
-    } catch (error) {
+    addDoc(
+      collection(firestore, `users/${user.uid}/songs`),
+      songWithTimestamp
+    ).catch((error) => {
       console.error('Error saving song: ', error);
       toast({
         title: 'Failed to save song',
         description: 'There was an error saving your music to your library.',
         variant: 'destructive',
       });
-    }
+    });
   };
 
   const isLoading = isUserLoading || areSongsLoading;

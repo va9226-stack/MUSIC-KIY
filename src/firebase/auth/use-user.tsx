@@ -24,18 +24,19 @@ export function useUser() {
         setUser(user);
         // Update user profile in Firestore
         const userRef = doc(firestore, `users/${user.uid}`);
-        try {
-          // We use set with merge to create the doc if it doesn't exist,
-          // or update it if it does.
-          await setDoc(userRef, {
-            displayName: user.displayName,
-            email: user.email,
-            photoURL: user.photoURL,
-            lastLogin: serverTimestamp(),
-          }, { merge: true });
-        } catch (error) {
+        
+        // We use set with merge to create the doc if it doesn't exist,
+        // or update it if it does. This is a fire-and-forget operation
+        // on the client, with errors logged to the console.
+        setDoc(userRef, {
+          displayName: user.displayName,
+          email: user.email,
+          photoURL: user.photoURL,
+          lastLogin: serverTimestamp(),
+        }, { merge: true }).catch(error => {
           console.error("Error updating user profile:", error);
-        }
+        });
+
       } else {
         // User is signed out.
         setUser(null);

@@ -13,6 +13,8 @@ import {z} from 'genkit';
 
 const GenerateMusicFromGenreInputSchema = z.object({
   genre: z.string().describe('The genre of music to generate.'),
+  lyrics: z.string().describe('The lyrics for the song.').optional(),
+  voice: z.string().describe('The voice for the song (e.g., male, female).').optional(),
 });
 export type GenerateMusicFromGenreInput = z.infer<
   typeof GenerateMusicFromGenreInputSchema
@@ -32,18 +34,6 @@ export async function generateMusicFromGenre(
 ): Promise<GenerateMusicFromGenreOutput> {
   return generateMusicFromGenreFlow(input);
 }
-
-const prompt = ai.definePrompt({
-  name: 'generateMusicFromGenrePrompt',
-  input: {schema: GenerateMusicFromGenreInputSchema},
-  output: {schema: GenerateMusicFromGenreOutputSchema},
-  prompt: `You are a music generation AI. Generate a song in the style of the following genre: {{{genre}}}. Return the song in a format suitable for audio playback.
-
-Follow these instructions strictly:
-1.  The response MUST be encoded as a WAV file.
-2.  The WAV file MUST be encoded as base64.
-3.  The output must be assigned to the 'musicDataBase64' field.`,
-});
 
 // Helper function to create a WAV file buffer from PCM data
 function pcmToWavBuffer(
@@ -114,15 +104,19 @@ const generateMusicFromGenreFlow = ai.defineFlow(
     outputSchema: GenerateMusicFromGenreOutputSchema,
   },
   async input => {
+    const voiceConfig = input.voice === 'female'
+      ? { prebuiltVoiceConfig: { voiceName: 'Achernar' } }
+      : { prebuiltVoiceConfig: { voiceName: 'Algenib' } };
+    
+    const promptText = input.lyrics || `A short, instrumental piece in the style of ${input.genre}`;
+
     const {media} = await ai.generate({
       model: 'googleai/gemini-2.5-flash-preview-tts',
-      prompt: input.genre,
+      prompt: promptText,
       config: {
         responseModalities: ['AUDIO'],
         speechConfig: {
-          voiceConfig: {
-            prebuiltVoiceConfig: {voiceName: 'Algenib'},
-          },
+          voiceConfig: voiceConfig,
         },
       },
     });

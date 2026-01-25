@@ -4,9 +4,13 @@ import { generateMusicFromGenre } from '@/ai/flows/generate-music-from-genre';
 import { displayMusicWithAICuration } from '@/ai/flows/display-music-with-ai-curation';
 import type { Song } from '@/lib/types';
 
-export async function generateSongAction(genre: string): Promise<Omit<Song, 'id' | 'createdAt'>> {
+export async function generateSongAction(
+  genre: string,
+  lyrics: string,
+  voice: string
+): Promise<Omit<Song, 'id' | 'createdAt'>> {
   try {
-    const { musicDataBase64 } = await generateMusicFromGenre({ genre });
+    const { musicDataBase64 } = await generateMusicFromGenre({ genre, lyrics, voice });
 
     // The AI flow for curation expects an image data URI.
     // We provide a transparent 1x1 pixel PNG as a placeholder.
