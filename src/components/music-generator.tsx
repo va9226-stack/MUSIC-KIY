@@ -8,19 +8,29 @@ import { Loader2, Wand2 } from 'lucide-react';
 import type { Song } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { User } from 'firebase/auth';
 
 const genres = ['jazz', 'pop', 'rock', 'electronic', 'classical', 'hip-hop'];
 
 type MusicGeneratorProps = {
-  onSongGenerated: (song: Song) => void;
+  onSongGenerated: (song: Omit<Song, 'id' | 'createdAt'>) => void;
+  user: User | null;
 };
 
-export function MusicGenerator({ onSongGenerated }: MusicGeneratorProps) {
+export function MusicGenerator({ onSongGenerated, user }: MusicGeneratorProps) {
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const handleGenerate = async () => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please login to generate and save music.",
+        variant: "destructive",
+      });
+      return;
+    }
     if (!selectedGenre) {
       toast({
         title: "Select a genre",
@@ -32,12 +42,7 @@ export function MusicGenerator({ onSongGenerated }: MusicGeneratorProps) {
     setIsLoading(true);
     try {
       const newSongData = await generateSongAction(selectedGenre);
-      const newSong: Song = {
-        ...newSongData,
-        id: crypto.randomUUID(),
-        createdAt: new Date().toISOString(),
-      };
-      onSongGenerated(newSong);
+      onSongGenerated(newSongData);
     } catch (error) {
       console.error(error);
       toast({
@@ -65,7 +70,7 @@ export function MusicGenerator({ onSongGenerated }: MusicGeneratorProps) {
           size="lg"
           className="w-full font-bold text-lg h-12"
           onClick={handleGenerate}
-          disabled={isLoading || !selectedGenre}
+          disabled={isLoading || !selectedGenre || !user}
           aria-live="polite"
         >
           {isLoading ? (
