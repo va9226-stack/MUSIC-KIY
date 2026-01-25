@@ -12,9 +12,18 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const GenerateMusicFromGenreInputSchema = z.object({
+  title: z.string().describe('The title of the song.').optional(),
   genre: z.string().describe('The genre of music to generate.'),
-  lyrics: z.string().describe('The lyrics for the song.').optional(),
-  voice: z.string().describe('The voice for the song (e.g., male, female).').optional(),
+  lyrics: z
+    .string()
+    .describe(
+      'The lyrics for the song, with structure tags like [Verse], [Chorus].'
+    )
+    .optional(),
+  voice: z
+    .string()
+    .describe('The main voice for the song (e.g., male, female).')
+    .optional(),
 });
 export type GenerateMusicFromGenreInput = z.infer<
   typeof GenerateMusicFromGenreInputSchema
@@ -85,7 +94,6 @@ function pcmToWavBuffer(
   return Buffer.concat([header, pcmData]);
 }
 
-
 async function toWav(
   pcmData: Buffer,
   channels = 1,
@@ -97,6 +105,43 @@ async function toWav(
   return wavBuffer.toString('base64');
 }
 
+function processLyricsForTTS(
+  lyrics: string,
+  mainVoice: 'male' | 'female'
+): {prompt: string; useMultiSpeaker: boolean} {
+  if (!lyrics || !lyrics.includes('[')) {
+    return {prompt: lyrics || '', useMultiSpeaker: false};
+  }
+
+  const mainSpeaker = 'Speaker1';
+  const secondarySpeaker = 'Speaker2';
+  let multiSpeakerPrompt = '';
+
+  // Split by tags, keeping the tags.
+  const sections = lyrics.split(/(\[[a-zA-Z]+\])/).filter(p => p.trim() !== '');
+
+  let currentSpeaker = mainSpeaker;
+  let hasStructure = false;
+
+  for (const section of sections) {
+    if (section.startsWith('[') && section.endsWith(']')) {
+      hasStructure = true;
+      const tag = section.slice(1, -1).toLowerCase();
+      // Assign speaker based on tag. Chorus and Hook get the secondary voice.
+      currentSpeaker =
+        tag === 'chorus' || tag === 'hook' || tag === 'bridge'
+          ? secondarySpeaker
+          : mainSpeaker;
+    } else {
+      multiSpeakerPrompt += `${currentSpeaker}: ${section.trim()}\n`;
+    }
+  }
+
+  if (!hasStructure) return {prompt: lyrics, useMultiSpeaker: false};
+
+  return {prompt: multiSpeakerPrompt.trim(), useMultiSpeaker: true};
+}
+
 const generateMusicFromGenreFlow = ai.defineFlow(
   {
     name: 'generateMusicFromGenreFlow',
@@ -104,20 +149,55 @@ const generateMusicFromGenreFlow = ai.defineFlow(
     outputSchema: GenerateMusicFromGenreOutputSchema,
   },
   async input => {
-    const voiceConfig = input.voice === 'female'
-      ? { prebuiltVoiceConfig: { voiceName: 'Achernar' } }
-      : { prebuiltVoiceConfig: { voiceName: 'Algenib' } };
-    
-    const promptText = input.lyrics || `A short, instrumental piece in the style of ${input.genre}`;
+    const mainVoiceSelection = input.voice === 'female' ? 'female' : 'male';
+
+    const {prompt: promptText, useMultiSpeaker} = processLyricsForTTS(
+      input.lyrics ||
+        `A short, instrumental piece in the style of ${input.genre}`,
+      mainVoiceSelection
+    );
+
+    let speechConfig: any;
+
+    if (useMultiSpeaker) {
+      const mainVoiceName =
+        mainVoiceSelection === 'female' ? 'Achernar' : 'Algenib';
+      const secondaryVoiceName =
+        mainVoiceSelection === 'female' ? 'Algenib' : 'Achernar'; // The other voice
+      speechConfig = {
+        multiSpeakerVoiceConfig: {
+          speakerVoiceConfigs: [
+            {
+              speaker: 'Speaker1',
+              voiceConfig: {
+                prebuiltVoiceConfig: {voiceName: mainVoiceName},
+              },
+            },
+            {
+              speaker: 'Speaker2',
+              voiceConfig: {
+                prebuiltVoiceConfig: {voiceName: secondaryVoiceName},
+              },
+            },
+          ],
+        },
+      };
+    } else {
+      speechConfig = {
+        voiceConfig: {
+          prebuiltVoiceConfig: {
+            voiceName: mainVoiceSelection === 'female' ? 'Achernar' : 'Algenib',
+          },
+        },
+      };
+    }
 
     const {media} = await ai.generate({
       model: 'googleai/gemini-2.5-flash-preview-tts',
       prompt: promptText,
       config: {
         responseModalities: ['AUDIO'],
-        speechConfig: {
-          voiceConfig: voiceConfig,
-        },
+        speechConfig: speechConfig,
       },
     });
 

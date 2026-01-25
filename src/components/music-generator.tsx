@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { User } from 'firebase/auth';
 import { Label } from './ui/label';
+import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { Separator } from './ui/separator';
@@ -23,6 +24,7 @@ type MusicGeneratorProps = {
 
 export function MusicGenerator({ onSongGenerated, user }: MusicGeneratorProps) {
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
+  const [title, setTitle] = useState('');
   const [lyrics, setLyrics] = useState('');
   const [voice, setVoice] = useState('male');
   const [isLoading, setIsLoading] = useState(false);
@@ -47,7 +49,7 @@ export function MusicGenerator({ onSongGenerated, user }: MusicGeneratorProps) {
     }
     setIsLoading(true);
     try {
-      const newSongData = await generateSongAction(selectedGenre, lyrics, voice);
+      const newSongData = await generateSongAction(title, selectedGenre, lyrics, voice);
       onSongGenerated(newSongData);
     } catch (error) {
       console.error(error);
@@ -72,20 +74,30 @@ export function MusicGenerator({ onSongGenerated, user }: MusicGeneratorProps) {
           <CardDescription className="text-base text-muted-foreground">Let KIY compose a unique piece based on your chosen style.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-10 pt-4">
+          <div className="space-y-3 text-left">
+              <Label htmlFor="title" className="text-lg font-headline font-semibold">1. Title</Label>
+              <Input
+                id="title"
+                placeholder="Midnight Wanderer"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="text-base bg-background/50"
+              />
+          </div>
           <div className="grid md:grid-cols-2 gap-8 items-start">
             <div className="space-y-3 text-left">
-              <Label htmlFor="lyrics" className="text-lg font-headline font-semibold">1. Write Lyrics (Optional)</Label>
+              <Label htmlFor="lyrics" className="text-lg font-headline font-semibold">2. Write Lyrics (Optional)</Label>
               <Textarea
                 id="lyrics"
-                placeholder="In the city of chrome and code..."
+                placeholder="Use tags like [Verse], [Chorus], [Bridge], or [Hook] to structure your song for a dynamic performance.&#10;[Verse]&#10;In the city of chrome and code...&#10;[Chorus]&#10;We're spirits in the machine..."
                 value={lyrics}
                 onChange={(e) => setLyrics(e.target.value)}
-                className="min-h-[120px] text-base bg-background/50"
+                className="min-h-[150px] text-base bg-background/50"
               />
             </div>
             <div className="space-y-6">
                 <div className="space-y-3 text-left">
-                  <h3 className="text-lg font-headline font-semibold">2. Choose a Voice</h3>
+                  <h3 className="text-lg font-headline font-semibold">3. Choose a Voice</h3>
                     <RadioGroup
                       defaultValue="male"
                       onValueChange={setVoice}
@@ -108,7 +120,7 @@ export function MusicGenerator({ onSongGenerated, user }: MusicGeneratorProps) {
           <Separator className="bg-border/20"/>
 
           <div className="space-y-4 text-center">
-            <h3 className="text-lg font-headline font-semibold">3. Select a Genre</h3>
+            <h3 className="text-lg font-headline font-semibold">4. Select a Genre</h3>
             <GenreSelector genres={genres} selectedGenre={selectedGenre} onSelectGenre={setSelectedGenre} />
           </div>
 

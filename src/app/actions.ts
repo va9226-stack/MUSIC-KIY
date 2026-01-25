@@ -5,21 +5,24 @@ import { displayMusicWithAICuration } from '@/ai/flows/display-music-with-ai-cur
 import type { Song } from '@/lib/types';
 
 export async function generateSongAction(
+  title: string,
   genre: string,
   lyrics: string,
   voice: string
 ): Promise<Omit<Song, 'id' | 'createdAt'>> {
   try {
-    const { musicDataBase64 } = await generateMusicFromGenre({ genre, lyrics, voice });
+    const { musicDataBase64 } = await generateMusicFromGenre({ title, genre, lyrics, voice });
 
     // The AI flow for curation expects an image data URI.
     // We provide a transparent 1x1 pixel PNG as a placeholder.
     // The AI will decide if an image is even worth showing.
     const imageAsDataUri = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
 
+    const songTitle = title || `Untitled ${genre} Track`;
+
     // Provide some dummy audio features for the AI to curate.
     const curatedInfo = await displayMusicWithAICuration({
-      songTitle: `Untitled ${genre} Track`,
+      songTitle: songTitle,
       genreTags: [genre],
       audioFeatures: {
         tempo: Math.floor(Math.random() * 60) + 90, // 90-150 BPM
@@ -30,6 +33,7 @@ export async function generateSongAction(
     });
 
     return {
+      title: songTitle,
       genre,
       audioData: musicDataBase64,
       curatedInfo,

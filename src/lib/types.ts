@@ -2,6 +2,7 @@ import type { DisplayMusicWithAICurationOutput } from "@/ai/flows/display-music-
 
 export interface Song {
   id: string;
+  title: string;
   genre: string;
   audioData: string; // base64 encoded wav
   curatedInfo: DisplayMusicWithAICurationOutput;

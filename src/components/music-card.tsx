@@ -60,7 +60,7 @@ type MusicCardProps = {
 };
 
 export function MusicCard({ song, onSongDeleted }: MusicCardProps) {
-  const { id, curatedInfo, audioData, createdAt, genre } = song;
+  const { id, curatedInfo, audioData, createdAt, genre, title } = song;
   const placeholderImage = PlaceHolderImages.find(
     (p) => p.id === 'music-card-placeholder'
   );
@@ -83,7 +83,7 @@ export function MusicCard({ song, onSongDeleted }: MusicCardProps) {
           <div>
             {curatedInfo.titleIncluded && (
               <CardTitle className="font-headline capitalize text-2xl">
-                Untitled {genre} Track
+                {title}
               </CardTitle>
             )}
             <CardDescription className="flex items-center gap-2 text-xs text-muted-foreground pt-1">
