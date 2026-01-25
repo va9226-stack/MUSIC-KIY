@@ -5,9 +5,10 @@ import { FileQuestion } from 'lucide-react';
 
 type GeneratedMusicListProps = {
   songs: Song[];
+  onSongDeleted: (songId: string) => void;
 };
 
-export function GeneratedMusicList({ songs }: GeneratedMusicListProps) {
+export function GeneratedMusicList({ songs, onSongDeleted }: GeneratedMusicListProps) {
   const sortedSongs = [...songs].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   if (sortedSongs.length === 0) {
@@ -27,7 +28,7 @@ export function GeneratedMusicList({ songs }: GeneratedMusicListProps) {
   return (
     <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
       {sortedSongs.map(song => (
-        <MusicCard key={song.id} song={song} />
+        <MusicCard key={song.id} song={song} onSongDeleted={onSongDeleted} />
       ))}
     </div>
   );

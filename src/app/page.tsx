@@ -1,6 +1,12 @@
 'use client';
 
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  serverTimestamp,
+} from 'firebase/firestore';
 import {
   useCollection,
   useFirestore,
@@ -46,9 +52,7 @@ export default function Home() {
   const { data: songs, isLoading: areSongsLoading } =
     useCollection<Song>(songsQuery);
 
-  const handleSongGenerated = async (
-    songData: Omit<Song, 'id' | 'createdAt'>
-  ) => {
+  const handleSongGenerated = (songData: Omit<Song, 'id' | 'createdAt'>) => {
     if (!user || !firestore) {
       toast({
         title: 'Please login to save songs',
@@ -66,14 +70,47 @@ export default function Home() {
     addDoc(
       collection(firestore, `users/${user.uid}/songs`),
       songWithTimestamp
-    ).catch((error) => {
-      console.error('Error saving song: ', error);
+    )
+      .then(() => {
+        toast({
+          title: 'Song Saved!',
+          description: 'Your new creation has been added to your library.',
+        });
+      })
+      .catch((error) => {
+        console.error('Error saving song: ', error);
+        toast({
+          title: 'Failed to save song',
+          description: 'There was an error saving your music to your library.',
+          variant: 'destructive',
+        });
+      });
+  };
+
+  const handleSongDeleted = (songId: string) => {
+    if (!user || !firestore) {
       toast({
-        title: 'Failed to save song',
-        description: 'There was an error saving your music to your library.',
+        title: 'Please login to delete songs',
         variant: 'destructive',
       });
-    });
+      return;
+    }
+
+    deleteDoc(doc(firestore, `users/${user.uid}/songs/${songId}`))
+      .then(() => {
+        toast({
+          title: 'Song Deleted',
+          description: 'The song has been removed from your library.',
+        });
+      })
+      .catch((error) => {
+        console.error('Error deleting song:', error);
+        toast({
+          title: 'Failed to delete song',
+          description: 'There was an error deleting the song.',
+          variant: 'destructive',
+        });
+      });
   };
 
   const isLoading = isUserLoading || areSongsLoading;
@@ -91,7 +128,10 @@ export default function Home() {
           {isLoading ? (
             <LibrarySkeleton />
           ) : (
-            <GeneratedMusicList songs={songs || []} />
+            <GeneratedMusicList
+              songs={songs || []}
+              onSongDeleted={handleSongDeleted}
+            />
           )}
         </div>
       </main>
