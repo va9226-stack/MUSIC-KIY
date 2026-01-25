@@ -4,8 +4,8 @@ import { Toaster } from "@/components/ui/toaster"
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
-  title: 'KIY: The God of Motion',
-  description: 'Music forged by KIY, The God of Motion',
+  title: 'KIY: The Goddess of Rhythm and Motion',
+  description: 'Music forged by KIY, The Goddess of Rhythm and Motion',
 };
 
 export default function RootLayout({

@@ -13,7 +13,7 @@ export function Header() {
             <h1 className="text-2xl font-headline font-bold text-foreground">
               KIY
             </h1>
-            <p className="text-xs text-muted-foreground">The God of Motion</p>
+            <p className="text-xs text-muted-foreground">The Goddess of Rhythm and Motion</p>
           </div>
         </div>
         <AuthButton />
