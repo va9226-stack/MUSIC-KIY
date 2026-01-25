@@ -19,6 +19,7 @@ import { MusicGenerator } from '@/components/music-generator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import type { Song } from '@/lib/types';
+import { Separator } from '@/components/ui/separator';
 
 function LibrarySkeleton() {
   return (
@@ -117,12 +118,15 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
+      <div className="absolute top-0 left-0 w-full h-[600px] bg-gradient-to-br from-primary/20 via-transparent to-transparent -z-0" />
       <Header />
-      <main className="flex-grow container mx-auto p-4 md:p-8 space-y-12">
+      <main className="flex-grow container mx-auto p-4 md:p-8 space-y-16 z-10">
         <MusicGenerator onSongGenerated={handleSongGenerated} user={user} />
 
-        <div className="space-y-6">
-          <h2 className="text-3xl font-headline font-bold text-center md:text-left">
+        <Separator className="bg-border/50" />
+        
+        <div className="space-y-8">
+          <h2 className="text-4xl font-headline font-bold text-center">
             Your Forged Creations
           </h2>
           {isLoading ? (
@@ -135,7 +139,7 @@ export default function Home() {
           )}
         </div>
       </main>
-      <footer className="text-center py-6 text-sm text-muted-foreground border-t bg-card">
+      <footer className="text-center py-8 text-sm text-muted-foreground border-t bg-background">
         <p>Forged in the Crucible of KIY &copy; {new Date().getFullYear()}</p>
       </footer>
     </div>

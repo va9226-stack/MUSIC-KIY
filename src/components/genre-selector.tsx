@@ -17,10 +17,10 @@ export function GenreSelector({ genres, selectedGenre, onSelectGenre }: GenreSel
           key={genre}
           variant={selectedGenre === genre ? 'default' : 'outline'}
           className={cn(
-            "capitalize rounded-full transition-all duration-300 transform",
+            "capitalize rounded-full transition-all duration-300 transform text-base px-5 py-3 h-auto",
             selectedGenre === genre 
-              ? "bg-primary text-primary-foreground scale-105 shadow-lg"
-              : "hover:shadow-md hover:scale-105"
+              ? "bg-primary text-primary-foreground scale-105 shadow-lg shadow-primary/30"
+              : "border-border/50 bg-card/50 hover:bg-primary/20 hover:border-primary/50 hover:text-primary-foreground hover:scale-105"
           )}
           onClick={() => onSelectGenre(genre)}
         >

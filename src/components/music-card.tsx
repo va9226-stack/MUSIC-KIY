@@ -66,14 +66,14 @@ export function MusicCard({ song, onSongDeleted }: MusicCardProps) {
   );
 
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-xl flex flex-col group">
+    <Card className="overflow-hidden transition-all hover:shadow-2xl hover:shadow-primary/20 flex flex-col group bg-card/50 backdrop-blur-sm border-border/50 hover:-translate-y-1">
       {curatedInfo.imageIncluded && placeholderImage && (
         <div className="aspect-video relative overflow-hidden">
           <Image
             src={placeholderImage.imageUrl}
             alt={placeholderImage.description}
             fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
             data-ai-hint={placeholderImage.imageHint}
           />
         </div>
@@ -82,7 +82,7 @@ export function MusicCard({ song, onSongDeleted }: MusicCardProps) {
         <div className="flex justify-between items-start gap-2">
           <div>
             {curatedInfo.titleIncluded && (
-              <CardTitle className="font-headline capitalize">
+              <CardTitle className="font-headline capitalize text-2xl">
                 Untitled {genre} Track
               </CardTitle>
             )}
@@ -126,9 +126,9 @@ export function MusicCard({ song, onSongDeleted }: MusicCardProps) {
           </AlertDialog>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4 flex-grow flex flex-col">
+      <CardContent className="space-y-6 flex-grow flex flex-col">
         <div className="flex flex-wrap gap-2">
-          <Badge variant="secondary" className="capitalize">
+          <Badge variant="secondary" className="capitalize bg-primary/20 text-primary-foreground border-primary/50">
             <Music className="h-3 w-3 mr-1" />
             {genre}
           </Badge>
@@ -142,7 +142,7 @@ export function MusicCard({ song, onSongDeleted }: MusicCardProps) {
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-muted-foreground">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-foreground/80">
           {curatedInfo.highlightedFeatures.mood && (
             <div className="flex items-center gap-2">
               <MoodIcon className="h-4 w-4 text-accent" />
