@@ -9,9 +9,12 @@ export function Header() {
           <div className="bg-primary text-primary-foreground p-2 rounded-lg">
             <Music2 className="h-6 w-6" />
           </div>
-          <h1 className="text-2xl font-headline font-bold text-foreground">
-            Harmonic AI
-          </h1>
+          <div>
+            <h1 className="text-2xl font-headline font-bold text-foreground">
+              KIY
+            </h1>
+            <p className="text-xs text-muted-foreground">The God of Motion</p>
+          </div>
         </div>
         <AuthButton />
       </div>

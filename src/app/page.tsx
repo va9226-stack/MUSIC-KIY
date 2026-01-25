@@ -73,7 +73,7 @@ export default function Home() {
     )
       .then(() => {
         toast({
-          title: 'Song Saved!',
+          title: 'Song Forged!',
           description: 'Your new creation has been added to your library.',
         });
       })
@@ -123,7 +123,7 @@ export default function Home() {
 
         <div className="space-y-6">
           <h2 className="text-3xl font-headline font-bold text-center md:text-left">
-            Your Generated Library
+            Your Forged Creations
           </h2>
           {isLoading ? (
             <LibrarySkeleton />
@@ -136,7 +136,7 @@ export default function Home() {
         </div>
       </main>
       <footer className="text-center py-6 text-sm text-muted-foreground border-t bg-card">
-        <p>Powered by Harmonic AI &copy; {new Date().getFullYear()}</p>
+        <p>Forged in the Crucible of KIY &copy; {new Date().getFullYear()}</p>
       </footer>
     </div>
   );

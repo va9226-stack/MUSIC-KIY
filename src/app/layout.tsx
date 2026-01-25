@@ -4,8 +4,8 @@ import { Toaster } from "@/components/ui/toaster"
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
-  title: 'Harmonic AI',
-  description: 'AI-powered music generation by Firebase Studio',
+  title: 'KIY: The God of Motion',
+  description: 'Music forged by KIY, The God of Motion',
 };
 
 export default function RootLayout({
